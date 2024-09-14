@@ -3,6 +3,10 @@
 
 FROM ubuntu:24.04
 
+LABEL org.opencontainers.image.source=https://github.com/OverlyDev/steamcmd
+LABEL org.opencontainers.image.description="steamcmd without the stupid"
+LABEL org.opencontainers.image.licenses=MIT
+
 # Insert Steam prompt answers
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN echo steam steam/question select "I AGREE" | debconf-set-selections && \

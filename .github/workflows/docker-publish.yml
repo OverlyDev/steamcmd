@@ -11,6 +11,7 @@ on:
   push:
     branches: [ "main" ]
     paths:
+      - .github/workflows/docker-publish.yml
       - Dockerfile
     # # Publish semver tags as releases.
     # tags: [ 'v*.*.*' ]
@@ -104,6 +105,14 @@ jobs:
           # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
           TAGS: ${{ steps.meta.outputs.tags }}
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
+          COSIGN_EXPERIMENTAL: "true"
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+
+      # Source: https://medium.com/ci-cd-devops/keyless-image-signing-with-sigstore-cosign-rekor-gh-action-ghcr-482002a0bd67
+      - name: Verify the image
+        run: |
+          cosign verify ghcr.io/overlydev/steamcmd \
+            --certificate-identity https://github.com/OverlyDev/steamcmd/.github/workflows/docker-publish.yml@refs/heads/main \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
